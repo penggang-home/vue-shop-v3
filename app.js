@@ -7,7 +7,6 @@ var mount = require('mount-routes')
 
 var app = express()
 
-
 /**
  *
  * 公共系统初始化
@@ -18,7 +17,7 @@ app.use(bodyParser.urlencoded({ extended: true }))
 
 // 初始化数据库模块
 var database = require('./modules/database')
-database.initialize(app, function(err) {
+database.initialize(app, function (err) {
   if (err) {
     console.error('连接数据库失败失败 %s', err)
   }
@@ -35,7 +34,7 @@ var managerService = require(path.join(process.cwd(), 'services/ManagerService')
 var roleService = require(path.join(process.cwd(), 'services/RoleService'))
 
 // 设置跨域和相应数据格式
-app.all('/api/*', function(req, res, next) {
+app.all('/api/*', function (req, res, next) {
   res.header('Access-Control-Allow-Origin', '*')
   res.header('Access-Control-Allow-Headers', 'X-Requested-With, mytoken')
   res.header('Access-Control-Allow-Headers', 'X-Requested-With, Authorization')
@@ -64,10 +63,10 @@ app.use('/api/private/v1/*', admin_passport.tokenAuth)
 var authorization = require(path.join(process.cwd(), '/modules/authorization'))
 
 // 设置全局权限
-authorization.setAuthFn(function(req, res, next, serviceName, actionName, passFn) {
+authorization.setAuthFn(function (req, res, next, serviceName, actionName, passFn) {
   if (!req.userInfo || isNaN(parseInt(req.userInfo.rid))) return res.sendResult('无角色ID分配')
   // 验证权限
-  roleService.authRight(req.userInfo.rid, serviceName, actionName, function(err, pass) {
+  roleService.authRight(req.userInfo.rid, serviceName, actionName, function (err, pass) {
     passFn(pass)
   })
 })
@@ -80,11 +79,14 @@ authorization.setAuthFn(function(req, res, next, serviceName, actionName, passFn
 // 带路径的用法并且可以打印出路有表
 mount(app, path.join(process.cwd(), '/routes'), true)
 
-app.all('/ueditor/ue', function(req, res, next) {
+app.all('/ueditor/ue', function (req, res, next) {
   res.header('Access-Control-Allow-Origin', '*')
   res.header('Access-Control-Allow-Headers', 'X-Requested-With, mytoken')
   res.header('Access-Control-Allow-Headers', 'X-Requested-With, Authorization')
-  res.header('Access-Control-Allow-Headers', 'Content-Type, Content-Length, Authorization, Accept, X-Requested-With, X_Requested_With')
+  res.header(
+    'Access-Control-Allow-Headers',
+    'Content-Type, Content-Length, Authorization, Accept, X-Requested-With, X_Requested_With'
+  )
   res.header('Access-Control-Allow-Methods', 'PUT,POST,GET,DELETE,OPTIONS')
   res.header('X-Powered-By', ' 3.2.1')
   if (req.method == 'OPTIONS') res.send(200)
@@ -118,10 +120,10 @@ app.get('/api/private/v1/kuaidi/:orderno', logistics.getLogisticsInfo)
  *
  */
 // 如果没有路径处理就返回 Not Found
-app.use(function(req, res, next) {
+app.use(function (req, res, next) {
   res.sendResult(null, 404, 'Not Found')
 })
 
-app.listen(8888)
+app.server = app.listen(8888)
 
 module.exports = app
